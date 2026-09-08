@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
 import { Home, RotateCcw } from "lucide-react";
+import { API_BASE_URL } from "../services/api";
 
 function Mascot({ size = 100, score = 0 }) {
   const isAmazing = score >= 90;
@@ -213,7 +214,7 @@ function Practice() {
       setQuestion(null);
 
       const response = await fetch(
-        "${API_BASE_URL}/Practice/start",
+        `${API_BASE_URL}/Practice/start`,
         {
           method: "POST",
           headers: {
@@ -342,7 +343,7 @@ function Practice() {
 
     try {
       const response = await fetch(
-        "${API_BASE_URL}/Practice/answer",
+        `${API_BASE_URL}/Practice/answer`,
         {
           method: "POST",
           headers: {
@@ -448,7 +449,7 @@ function Practice() {
     // Start a brand-new session
     try {
       const response = await fetch(
-        "${API_BASE_URL}/Practice/start",
+        `${API_BASE_URL}/Practice/start`,
         {
           method: "POST",
           headers: {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
+import { API_BASE_URL } from "../services/api";
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ function StudentDashboard() {
   async function loadSets() {
     try {
       const response = await fetch(
-        "${API_BASE_URL}/StudentPractice/sets",
+        `${API_BASE_URL}/StudentPractice/sets`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

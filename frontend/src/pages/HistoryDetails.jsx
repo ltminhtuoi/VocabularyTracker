@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
+import { API_BASE_URL } from "../services/api";
 
 function HistoryDetails() {
   const { sessionId } = useParams();

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TeacherHeader from "../components/TeacherHeader";
+import { API_BASE_URL } from "../services/api";
 
 function TeacherDashboard() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ function TeacherDashboard() {
       setLoadingStudents(true);
 
       const response = await fetch(
-        "${API_BASE_URL}/TeacherDashboard/students",
+        `${API_BASE_URL}/TeacherDashboard/students`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,7 +70,7 @@ function TeacherDashboard() {
       setLoadingSets(true);
 
       const response = await fetch(
-        "${API_BASE_URL}/FlashcardSet",
+        `${API_BASE_URL}/FlashcardSet`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -218,7 +219,7 @@ function TeacherDashboard() {
       }
 
       const response = await fetch(
-        "${API_BASE_URL}/Flashcard/import",
+        `${API_BASE_URL}/Flashcard/import`,
         {
           method: "POST",
           headers: {

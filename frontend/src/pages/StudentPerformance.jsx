@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TeacherHeader from "../components/TeacherHeader";
+import { API_BASE_URL } from "../services/api";
 
 function StudentPerformance() {
   const { studentId } = useParams();
