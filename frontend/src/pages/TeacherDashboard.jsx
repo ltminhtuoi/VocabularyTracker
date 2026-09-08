@@ -20,6 +20,7 @@ function TeacherDashboard() {
 
   const [setName, setSetName] = useState("");
   const [setDescription, setSetDescription] = useState("");
+  const [wordsToPlay, setWordsToPlay] = useState(0);
 
   const [selectedImportSetId, setSelectedImportSetId] =
     useState("");
@@ -115,10 +116,10 @@ function TeacherDashboard() {
 
       const response = await fetch(
         `${API_BASE_URL}/FlashcardSet?name=${encodeURIComponent(
-          setName
-        )}&description=${encodeURIComponent(
-          setDescription
-        )}`,
+  setName
+)}&description=${encodeURIComponent(
+  setDescription
+)}&wordsToPlay=${wordsToPlay}`,
         {
           method: "POST",
           headers: {
@@ -483,25 +484,23 @@ function TeacherDashboard() {
               </div>
 
               <div className="teacher-field">
-
-                <label htmlFor="set-description">
-                  Description
-                </label>
-
-                <input
-                  id="set-description"
-                  type="text"
-                  value={setDescription}
-                  onChange={(e) =>
-                    setSetDescription(
-                      e.target.value
-                    )
-                  }
-                  placeholder="e.g. Common words for beginners"
-                />
-
-              </div>
-
+  <label htmlFor="words-to-play">
+    Words to play
+  </label>
+  <select
+    id="words-to-play"
+    value={wordsToPlay}
+    onChange={(e) =>
+      setWordsToPlay(Number(e.target.value))
+    }
+  >
+    <option value={0}>All words</option>
+    <option value={10}>10 words — Smart Review</option>
+    <option value={20}>20 words — Smart Review</option>
+    <option value={30}>30 words — Smart Review</option>
+    <option value={50}>50 words — Smart Review</option>
+  </select>
+</div>
               <button
                 className="primary-button teacher-full-button"
                 type="submit"
@@ -919,17 +918,20 @@ function TeacherDashboard() {
                   </div>
 
                   <div className="teacher-set-footer">
+  <span>
+    {set.flashcardCount || 0} words
+  </span>
 
-                    <span>
-                      {set.flashcardCount || 0}{" "}
-                      words
-                    </span>
+  <span>
+    {set.wordsToPlay === 0
+      ? "All words"
+      : `Smart Review · ${set.wordsToPlay}`}
+  </span>
 
-                    <span>
-                      View →
-                    </span>
-
-                  </div>
+  <span>
+    View →
+  </span>
+</div>
 
                 </button>
 

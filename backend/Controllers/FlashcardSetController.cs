@@ -32,6 +32,7 @@ public class FlashcardSetController : ControllerBase
                 id = fs.Id,
                 name = fs.Name,
                 description = fs.Description,
+                wordsToPlay = fs.WordsToPlay,
                 createdAt = fs.CreatedAt,
                 flashcardCount = fs.Flashcards.Count
             })
@@ -42,30 +43,44 @@ public class FlashcardSetController : ControllerBase
 
     // POST: /api/FlashcardSet
     [HttpPost]
-    public async Task<IActionResult> CreateSet(
-        string name,
-        string description = "")
+public async Task<IActionResult> CreateSet(
+    string name,
+    string description = "",
+    int wordsToPlay = 0)
+{
+    var teacherId = GetCurrentUserId();
+
+    if (wordsToPlay != 0 &&
+        wordsToPlay != 10 &&
+        wordsToPlay != 20 &&
+        wordsToPlay != 30 &&
+        wordsToPlay != 50)
     {
-        var teacherId = GetCurrentUserId();
-
-        var set = new FlashcardSet
+        return BadRequest(new
         {
-            TeacherId = teacherId,
-            Name = name,
-            Description = description
-        };
-
-        _context.FlashcardSets.Add(set);
-
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            message = "Flashcard set created successfully.",
-            setId = set.Id
+            message = "Words to play must be 0, 10, 20, 30, or 50."
         });
     }
 
+    var set = new FlashcardSet
+    {
+        TeacherId = teacherId,
+        Name = name,
+        Description = description,
+        WordsToPlay = wordsToPlay
+    };
+
+    _context.FlashcardSets.Add(set);
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = "Flashcard set created successfully.",
+        setId = set.Id,
+        wordsToPlay = set.WordsToPlay
+    });
+}
     // GET: /api/FlashcardSet/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSet(int id)
@@ -91,6 +106,7 @@ public class FlashcardSetController : ControllerBase
             id = set.Id,
             name = set.Name,
             description = set.Description,
+            wordsToPlay = set.WordsToPlay,
             createdAt = set.CreatedAt,
             flashcards = set.Flashcards.Select(f => new
             {

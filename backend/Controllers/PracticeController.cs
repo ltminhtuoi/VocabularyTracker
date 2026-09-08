@@ -51,17 +51,39 @@ public class PracticeController : ControllerBase
         }
 
         // Get the flashcards
-        var totalQuestions = await _context.Flashcards
-            .CountAsync(f =>
-                f.FlashcardSetId == request.FlashcardSetId);
+        var flashcardCount = await _context.Flashcards
+    .CountAsync(f =>
+        f.FlashcardSetId == request.FlashcardSetId);
 
-        if (totalQuestions == 0)
-        {
-            return BadRequest(new
-            {
-                message = "This flashcard set has no flashcards."
-            });
-        }
+if (flashcardCount == 0)
+{
+    return BadRequest(new
+    {
+        message = "This flashcard set has no flashcards."
+    });
+}
+
+var flashcardSet = await _context.FlashcardSets
+    .FirstOrDefaultAsync(fs =>
+        fs.Id == request.FlashcardSetId);
+
+if (flashcardSet == null)
+{
+    return NotFound(new
+    {
+        message = "Flashcard set not found."
+    });
+}
+
+var totalQuestions =
+    flashcardSet.WordsToPlay == 0
+        ? flashcardCount
+        : Math.Min(
+            flashcardSet.WordsToPlay,
+            flashcardCount
+        );
+
+        
 
         // Create a new practice session
         var session = new PracticeSession

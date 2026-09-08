@@ -260,6 +260,12 @@ function FlashcardSetDetails() {
                   "Vocabulary practice"}
               </p>
 
+              <p>
+  {set.wordsToPlay === 0
+    ? "Practice mode: All words"
+    : `Practice mode: Smart Review · ${set.wordsToPlay} words`}
+</p>
+
             </div>
 
           </div>

@@ -10,6 +10,8 @@ public class FlashcardSet
 
     public string Description { get; set; } = string.Empty;
 
+    public int WordsToPlay { get; set; } = 0;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User Teacher { get; set; } = null!;

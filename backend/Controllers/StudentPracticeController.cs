@@ -222,17 +222,101 @@ public class StudentPracticeController : ControllerBase
         // Random generator
         // ----------------------------------------
 
-        var random = new Random();
-
         // ----------------------------------------
-        // Pick random unanswered flashcard
-        // ----------------------------------------
+// Smart Review
+// ----------------------------------------
 
-        var question =
-            remainingFlashcards[
-                random.Next(
-                    remainingFlashcards.Count)
-            ];
+var random = new Random();
+
+var history =
+    await _context.FlashcardAttempts
+        .Where(a =>
+            a.StudentId == student.Id &&
+            a.Flashcard.FlashcardSetId ==
+                session.FlashcardSetId)
+        .GroupBy(a => a.FlashcardId)
+        .Select(g => new
+        {
+            FlashcardId = g.Key,
+
+            CorrectCount =
+                g.Count(a => a.IsCorrect),
+
+            IncorrectCount =
+                g.Count(a => !a.IsCorrect),
+
+            LastReviewedAt =
+                g.Max(a => a.AnsweredAt)
+        })
+        .ToListAsync();
+
+var historyByFlashcard =
+    history.ToDictionary(
+        h => h.FlashcardId);
+
+var weightedFlashcards =
+    remainingFlashcards
+        .Select(card =>
+        {
+            if (!historyByFlashcard.TryGetValue(
+                    card.Id,
+                    out var h))
+            {
+                // Brand-new word
+                return new
+                {
+                    Card = card,
+                    Weight = 10.0
+                };
+            }
+
+            var weight = 1.0;
+
+            // More incorrect answers = higher priority
+            weight += Math.Min(h.IncorrectCount, 5) * 3.0;
+
+            // Correct answers reduce priority
+            weight -= h.CorrectCount * 0.5;
+
+            // Older reviews become more important
+            var daysSinceReview =
+                (DateTime.UtcNow -
+                 h.LastReviewedAt).TotalDays;
+
+            weight +=
+                Math.Min(daysSinceReview, 30) * 0.2;
+
+            // Never let the weight become zero/negative
+            weight = Math.Max(weight, 0.5);
+
+            return new
+            {
+                Card = card,
+                Weight = weight
+            };
+        })
+        .ToList();
+
+// ----------------------------------------
+// Weighted random selection
+// ----------------------------------------
+
+var totalWeight =
+    weightedFlashcards.Sum(x => x.Weight);
+
+var randomValue =
+    random.NextDouble() * totalWeight;
+
+var cumulativeWeight = 0.0;
+
+var question =
+    weightedFlashcards
+        .First(x =>
+        {
+            cumulativeWeight += x.Weight;
+            return randomValue <= cumulativeWeight;
+        })
+        .Card;
 
         // ----------------------------------------
         // Get 3 incorrect meanings
