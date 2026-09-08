@@ -1,6 +1,184 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
+import { Home, RotateCcw } from "lucide-react";
+
+function Mascot({ size = 100, score = 0 }) {
+  const isAmazing = score >= 90;
+  const isGreat = score >= 80;
+  const isNice = score >= 50;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* ears */}
+      <ellipse
+        cx={isAmazing ? "32" : "35"}
+        cy={isAmazing ? "19" : "22"}
+        rx="10"
+        ry="21"
+        fill="#58CC02"
+        transform={isNice ? "" : "rotate(-5 35 22)"}
+      />
+
+      <ellipse
+        cx={isAmazing ? "68" : "65"}
+        cy={isAmazing ? "19" : "22"}
+        rx="10"
+        ry="21"
+        fill="#58CC02"
+        transform={isNice ? "" : "rotate(5 65 22)"}
+      />
+
+      {/* inner ears */}
+      <ellipse
+        cx={isAmazing ? "32" : "35"}
+        cy={isAmazing ? "19" : "22"}
+        rx="4"
+        ry="13"
+        fill="#A8E86B"
+      />
+
+      <ellipse
+        cx={isAmazing ? "68" : "65"}
+        cy={isAmazing ? "19" : "22"}
+        rx="4"
+        ry="13"
+        fill="#A8E86B"
+      />
+
+      {/* head */}
+      <circle
+        cx="50"
+        cy="55"
+        r="32"
+        fill="#58CC02"
+      />
+
+      {/* AMAZING - excited eyes */}
+      {isAmazing ? (
+        <>
+          <circle cx="38" cy="51" r="4.5" fill="#263238" />
+          <circle cx="62" cy="51" r="4.5" fill="#263238" />
+
+          <circle cx="39.5" cy="49.5" r="1.3" fill="white" />
+          <circle cx="63.5" cy="49.5" r="1.3" fill="white" />
+
+          {/* happy eyebrows */}
+          <path
+            d="M34 44C37 41 40 41 43 43"
+            stroke="#263238"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M57 43C60 41 63 41 66 44"
+            stroke="#263238"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </>
+      ) : (
+        <>
+          {/* normal eyes */}
+          <circle
+            cx="39"
+            cy="52"
+            r="4"
+            fill="#263238"
+          />
+          <circle
+            cx="61"
+            cy="52"
+            r="4"
+            fill="#263238"
+          />
+
+          {/* eye highlights */}
+          <circle
+            cx="40.5"
+            cy="50.5"
+            r="1.2"
+            fill="white"
+          />
+          <circle
+            cx="62.5"
+            cy="50.5"
+            r="1.2"
+            fill="white"
+          />
+        </>
+      )}
+
+      {/* nose */}
+      <path
+        d="M47 61C49 59 51 59 53 61C51 64 49 64 47 61Z"
+        fill="#263238"
+      />
+
+      {/* 90%+ big happy smile */}
+      {isAmazing && (
+        <path
+          d="M42 65C45 72 55 72 58 65"
+          stroke="#263238"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      )}
+
+      {/* 80-89% happy smile */}
+      {isGreat && !isAmazing && (
+        <path
+          d="M43 65C46 70 54 70 57 65"
+          stroke="#263238"
+          strokeWidth="2.3"
+          strokeLinecap="round"
+        />
+      )}
+
+      {/* 50-79% gentle smile */}
+      {isNice && !isGreat && (
+        <path
+          d="M44 65C47 68 53 68 56 65"
+          stroke="#263238"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      )}
+
+      {/* below 50% - concerned expression */}
+      {!isNice && (
+        <>
+          <path
+            d="M34 46C37 44 40 44 43 46"
+            stroke="#263238"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M57 46C60 44 63 44 66 46"
+            stroke="#263238"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+
+          <path
+            d="M43 69C46 66 54 66 57 69"
+            stroke="#263238"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </>
+      )}
+    </svg>
+  );
+}
 
 function Practice() {
   const { setId } = useParams();
@@ -13,6 +191,7 @@ function Practice() {
 
   const [loading, setLoading] = useState(true);
   const [answering, setAnswering] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerResult, setAnswerResult] = useState(null);
@@ -21,6 +200,7 @@ function Practice() {
   const [result, setResult] = useState(null);
 
   const [error, setError] = useState("");
+  
 
   // ========================================
   // START PRACTICE
@@ -67,7 +247,6 @@ function Practice() {
 
   async function loadQuestion(currentSessionId) {
     try {
-      setLoading(true);
       setError("");
 
       const response = await fetch(
@@ -98,7 +277,6 @@ function Practice() {
         });
 
         setQuestion(null);
-        setLoading(false);
 
         return;
       }
@@ -189,26 +367,35 @@ function Practice() {
 
       setAnswerResult(data);
 
-      setTimeout(() => {
+      setTimeout(async () => {
+        setTransitioning(true);
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, 300)
+        );
+
         if (data.finished) {
           setFinished(true);
 
           setResult({
             score: data.score || 0,
-            correctAnswers:
-              data.correctAnswers || 0,
-            totalQuestions:
-              data.totalQuestions || 0,
+            correctAnswers: data.correctAnswers || 0,
+            totalQuestions: data.totalQuestions || 0,
           });
 
           setQuestion(null);
-          setLoading(false);
           setAnswering(false);
+          setTransitioning(false);
         } else {
-          loadQuestion(sessionId);
+          await loadQuestion(sessionId);
+
           setAnswering(false);
+
+          setTimeout(() => {
+            setTransitioning(false);
+          }, 50);
         }
-      }, 1500);
+      }, 1200);
 
     } catch (error) {
       setError(error.message);
@@ -294,98 +481,86 @@ function Practice() {
   // ========================================
   // RESULT SCREEN
   // ========================================
+if (finished && result) {
+  const percentage = result.score || 0;
 
-  if (finished && result) {
-    const percentage = result.score || 0;
+  let message = "";
 
-    return (
-      <div className="practice-page">
+  if (percentage >= 90) {
+    message = "Amazing!";
+  } else if (percentage >= 80) {
+    message = "Great job!";
+  } else if (percentage >= 50) {
+    message = "Nice work!";
+  } else {
+    message = "Good try!";
+  }
 
-        <StudentHeader />
+  return (
+    <div className="practice-page">
+      <StudentHeader />
 
-        <main className="practice-result-container">
+      <main className="practice-result-container">
+        <div className="result-card">
 
-          <div className="result-card">
+          <div className="result-character">
+            <Mascot size={100} score={percentage} />
+          </div>
 
-            <div className="result-trophy">
-              {percentage >= 80
-                ? "🏆"
-                : percentage >= 50
-                ? "⭐"
-                : "💪"}
-            </div>
+          <h1 className="result-title">
+            {message}
+          </h1>
 
-            <p className="result-eyebrow">
-              PRACTICE COMPLETE
-            </p>
-
-            <h1>
-              {percentage >= 80
-                ? "Amazing work!"
-                : percentage >= 50
-                ? "Nice job!"
-                : "Keep going!"}
-            </h1>
-
-            <p className="result-message">
-              You finished this practice session.
-            </p>
+          <div className="result-score-box">
 
             <div className="result-score">
               {percentage}%
             </div>
 
-            <div className="result-stats">
+            <p className="result-correct">
+              {result.correctAnswers} of{" "}
+              {result.totalQuestions} correct
+            </p>
 
-              <div>
-                <span>Correct</span>
-
-                <strong>
-                  {result.correctAnswers}
-                </strong>
-              </div>
-
-              <div>
-                <span>Total</span>
-
-                <strong>
-                  {result.totalQuestions}
-                </strong>
-              </div>
-
-            </div>
-
-            <div className="result-actions">
-
-              <button
-                className="primary-button"
-                onClick={restartPractice}
-                disabled={loading}
-              >
-                {loading
-                  ? "Starting..."
-                  : "Practice again"}
-              </button>
-
-              <button
-                className="secondary-button"
-                onClick={() =>
-                  navigate("/student/history")
-                }
-              >
-                View history
-              </button>
-
+            <div className="result-progress">
+              <div
+                className="result-progress-fill"
+                style={{
+                  width: `${percentage}%`,
+                }}
+              />
             </div>
 
           </div>
 
-        </main>
+          <div className="result-actions">
+  <button
+    className="result-icon-button practice-again-icon"
+    onClick={restartPractice}
+    disabled={loading}
+    title="Practice again"
+    aria-label="Practice again"
+    type="button"
+  >
+    <RotateCcw size={21} strokeWidth={2.2} />
+  </button>
 
-      </div>
-    );
-  }
+  <button
+    className="result-icon-button home-icon"
+    onClick={() => navigate("/student")}
+    title="Go home"
+    aria-label="Go home"
+    type="button"
+  >
+    <Home size={21} strokeWidth={2.2} />
+  </button>
+</div>
 
+        </div>
+      </main>
+    </div>
+  );
+}
   // ========================================
   // ERROR SCREEN
   // ========================================
@@ -534,7 +709,11 @@ function Practice() {
 
         {/* QUESTION CARD */}
 
-        <div className="practice-card">
+        <div
+          className={`practice-card ${
+            transitioning ? "is-transitioning" : ""
+          }`}
+        >
 
           <p className="practice-label">
             WHAT DOES THIS WORD MEAN?

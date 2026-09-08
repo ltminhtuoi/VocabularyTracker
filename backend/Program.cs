@@ -7,19 +7,31 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ========================================
+// Render / Server Port
+// ========================================
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// ========================================
 // Database
+// ========================================
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
 
+// ========================================
 // JWT Authentication
+// ========================================
 var jwtKey = builder.Configuration["Jwt:Key"];
 
-if (string.IsNullOrEmpty(jwtKey))
+if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException("JWT key is not configured.");
+    throw new InvalidOperationException(
+        "JWT key is not configured. Please set Jwt__Key in Render environment variables."
+    );
 }
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -43,20 +55,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// ========================================
 // CORS
+// ========================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
+// ========================================
+// Controllers
+// ========================================
 builder.Services.AddControllers();
 
+// ========================================
+// Swagger
+// ========================================
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -81,20 +101,34 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
+// ========================================
+// Build application
+// ========================================
 var app = builder.Build();
 
+// ========================================
+// Swagger
+// ========================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// CORS must run before authentication/authorization
+// ========================================
+// Middleware
+// ========================================
 app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ========================================
+// API Controllers
+// ========================================
 app.MapControllers();
 
+// ========================================
+// Start server
+// ========================================
 app.Run();
