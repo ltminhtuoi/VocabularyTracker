@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TeacherHeader from "../components/TeacherHeader";
+import { API_BASE_URL } from "../services/api";
 
 function FlashcardSetDetails() {
   const { id } = useParams();
@@ -20,7 +21,7 @@ function FlashcardSetDetails() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5279/api/FlashcardSet/${id}`,
+        `${API_BASE_URL}/FlashcardSet/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +65,7 @@ function FlashcardSetDetails() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5279/api/Flashcard/${flashcardId}`,
+        `${API_BASE_URL}/Flashcard/${flashcardId}`,
         {
           method: "DELETE",
           headers: {
@@ -104,7 +105,7 @@ function FlashcardSetDetails() {
 
     try {
       const response = await fetch(
-        `http://localhost:5279/api/FlashcardSet/${id}`,
+        `${API_BASE_URL}/FlashcardSet/${id}`,
         {
           method: "DELETE",
           headers: {

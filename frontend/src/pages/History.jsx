@@ -17,7 +17,7 @@ function History() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5279/api/History/student",
+        `${API_BASE_URL}/History/student`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

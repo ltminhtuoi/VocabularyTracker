@@ -40,7 +40,7 @@ function TeacherDashboard() {
       setLoadingStudents(true);
 
       const response = await fetch(
-        "http://localhost:5279/api/TeacherDashboard/students",
+        "${API_BASE_URL}/TeacherDashboard/students",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,7 +69,7 @@ function TeacherDashboard() {
       setLoadingSets(true);
 
       const response = await fetch(
-        "http://localhost:5279/api/FlashcardSet",
+        "${API_BASE_URL}/FlashcardSet",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -113,7 +113,7 @@ function TeacherDashboard() {
       setSuccessMessage("");
 
       const response = await fetch(
-        `http://localhost:5279/api/FlashcardSet?name=${encodeURIComponent(
+        `${API_BASE_URL}/FlashcardSet?name=${encodeURIComponent(
           setName
         )}&description=${encodeURIComponent(
           setDescription
@@ -218,7 +218,7 @@ function TeacherDashboard() {
       }
 
       const response = await fetch(
-        "http://localhost:5279/api/Flashcard/import",
+        "${API_BASE_URL}/Flashcard/import",
         {
           method: "POST",
           headers: {
@@ -275,7 +275,7 @@ function TeacherDashboard() {
       setSuccessMessage("");
 
       const response = await fetch(
-        `http://localhost:5279/api/Assignment?studentId=${selectedStudentId}&flashcardSetId=${selectedAssignmentSetId}`,
+        `${API_BASE_URL}/Assignment?studentId=${selectedStudentId}&flashcardSetId=${selectedAssignmentSetId}`,
         {
           method: "POST",
           headers: {

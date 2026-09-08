@@ -213,7 +213,7 @@ function Practice() {
       setQuestion(null);
 
       const response = await fetch(
-        "http://localhost:5279/api/Practice/start",
+        "${API_BASE_URL}/Practice/start",
         {
           method: "POST",
           headers: {
@@ -250,7 +250,7 @@ function Practice() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5279/api/StudentPractice/question/${currentSessionId}`,
+        `${API_BASE_URL}/StudentPractice/question/${currentSessionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -342,7 +342,7 @@ function Practice() {
 
     try {
       const response = await fetch(
-        "http://localhost:5279/api/Practice/answer",
+        "${API_BASE_URL}/Practice/answer",
         {
           method: "POST",
           headers: {
@@ -448,7 +448,7 @@ function Practice() {
     // Start a brand-new session
     try {
       const response = await fetch(
-        "http://localhost:5279/api/Practice/start",
+        "${API_BASE_URL}/Practice/start",
         {
           method: "POST",
           headers: {

@@ -18,7 +18,7 @@ function TeacherHistoryDetails() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5279/api/TeacherDashboard/session/${sessionId}`,
+        `${API_BASE_URL}/TeacherDashboard/session/${sessionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

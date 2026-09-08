@@ -20,7 +20,7 @@ function StudentPerformance() {
 
   async function loadPerformance() {
     const response = await fetch(
-      `http://localhost:5279/api/TeacherDashboard/student/${studentId}`,
+      `${API_BASE_URL}/TeacherDashboard/student/${studentId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -42,7 +42,7 @@ function StudentPerformance() {
 
   async function loadWeakWords() {
     const response = await fetch(
-      `http://localhost:5279/api/TeacherDashboard/student/${studentId}/weak-words`,
+      `${API_BASE_URL}/TeacherDashboard/student/${studentId}/weak-words`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ function StudentPerformance() {
 
   async function loadAssignedSets() {
     const response = await fetch(
-      `http://localhost:5279/api/Assignment/student/${studentId}`,
+      `${API_BASE_URL}/Assignment/student/${studentId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -119,7 +119,7 @@ function StudentPerformance() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5279/api/Assignment/${assignmentId}`,
+        `${API_BASE_URL}/Assignment/${assignmentId}`,
         {
           method: "DELETE",
           headers: {

@@ -15,7 +15,7 @@ function StudentDashboard() {
   async function loadSets() {
     try {
       const response = await fetch(
-        "http://localhost:5279/api/StudentPractice/sets",
+        "${API_BASE_URL}/StudentPractice/sets",
         {
           headers: {
             Authorization: `Bearer ${token}`,

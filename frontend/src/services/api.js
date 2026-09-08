@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://vocabularytracker-3.onrender.com/api";
+export const API_BASE_URL = "https://vocabularytracker-3.onrender.com/api";
 
 export async function login(username, password) {
   const response = await fetch(`${API_BASE_URL}/Auth/login`, {

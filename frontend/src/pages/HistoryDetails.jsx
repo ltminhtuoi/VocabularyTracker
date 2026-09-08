@@ -18,7 +18,7 @@ function HistoryDetails() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5279/api/History/student/${sessionId}`,
+        `${API_BASE_URL}/History/student/${sessionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
