@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TeacherHeader from "../components/TeacherHeader";
 import { API_BASE_URL } from "../services/api";
+import { playSound } from "../utils/sounds";
 function TeacherDashboard() {
   const navigate = useNavigate();
+  const handleClick = () => {
+    playSound("click", 0.35);
+  };
   const token = localStorage.getItem("token");
   const name = localStorage.getItem("name");
   const [students, setStudents] = useState([]);
@@ -215,7 +219,13 @@ function TeacherDashboard() {
           <div className="teacher-message teacher-message-error">
             {" "}
             <span>{error}</span>{" "}
-            <button type="button" onClick={() => setError("")}>
+            <button
+              type="button"
+              onClick={() => {
+                handleClick();
+                setError("");
+              }}
+            >
               {" "}
               ×{" "}
             </button>{" "}
@@ -225,7 +235,13 @@ function TeacherDashboard() {
           <div className="teacher-message teacher-message-success">
             {" "}
             <span>✓ {successMessage}</span>{" "}
-            <button type="button" onClick={() => setSuccessMessage("")}>
+            <button
+              type="button"
+              onClick={() => {
+                handleClick();
+                setSuccessMessage("");
+              }}
+            >
               {" "}
               ×{" "}
             </button>{" "}
@@ -310,6 +326,7 @@ function TeacherDashboard() {
                 className="primary-button teacher-full-button"
                 type="submit"
                 disabled={creatingSet}
+                onClick={handleClick}
               >
                 {" "}
                 {creatingSet ? "Creating..." : "Create set"}{" "}
@@ -361,6 +378,7 @@ function TeacherDashboard() {
                 className="primary-button teacher-full-button"
                 type="submit"
                 disabled={importing}
+                onClick={handleClick}
               >
                 {" "}
                 {importing ? "Importing..." : "Import flashcards"}{" "}
@@ -423,6 +441,7 @@ function TeacherDashboard() {
               className="primary-button teacher-assign-button"
               type="submit"
               disabled={assigning}
+              onClick={handleClick}
             >
               {assigning ? "Assigning..." : "Assign set"}
             </button>
@@ -468,9 +487,10 @@ function TeacherDashboard() {
                   key={student.studentId}
                   type="button"
                   className="teacher-student-card"
-                  onClick={() =>
-                    navigate(`/teacher/students/${student.studentId}`)
-                  }
+                  onClick={() => {
+                    handleClick();
+                    navigate(`/teacher/students/${student.studentId}`);
+                  }}
                 >
                   {" "}
                   <div className="teacher-student-avatar">
@@ -540,7 +560,10 @@ function TeacherDashboard() {
                   key={set.id}
                   type="button"
                   className="teacher-set-card"
-                  onClick={() => navigate(`/teacher/sets/${set.id}`)}
+                  onClick={() => {
+                    handleClick();
+                    navigate(`/teacher/sets/${set.id}`);
+                  }}
                 >
                   <div className="teacher-set-icon"> ✦ </div>{" "}
                   <div className="teacher-set-info">

@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
 import { Home, RotateCcw } from "lucide-react";
 import { API_BASE_URL } from "../services/api";
-
-function playSound(file, volume = 1) {
-  const audio = new Audio(`/sounds/${file}`);
-  audio.volume = volume;
-  audio.play().catch(() => {});
-}
+import { playSound, SOUNDS } from "../utils/sounds";
 
 function Mascot({ size = 100, score = 0 }) {
   const isAmazing = score >= 90;
@@ -137,6 +132,9 @@ function Practice() {
   const { setId } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const backgroundMusicRef = useRef(null);
+  const answerTimeoutRef = useRef(null);
+  const transitionTimeoutRef = useRef(null);
   const [sessionId, setSessionId] = useState(null);
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -147,6 +145,40 @@ function Practice() {
   const [finished, setFinished] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
+  function startBackgroundMusic() {
+    if (!backgroundMusicRef.current) {
+      backgroundMusicRef.current = new Audio(SOUNDS.background);
+      backgroundMusicRef.current.loop = true;
+      backgroundMusicRef.current.volume = 0.12;
+    }
+
+    backgroundMusicRef.current.play().catch(() => {});
+  }
+
+  function stopBackgroundMusic() {
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      stopBackgroundMusic();
+
+      if (answerTimeoutRef.current) {
+        clearTimeout(answerTimeoutRef.current);
+        answerTimeoutRef.current = null;
+      }
+
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   async function startPractice() {
     try {
       setLoading(true);
@@ -164,8 +196,10 @@ function Practice() {
       if (!response.ok) {
         throw new Error(data.message || "Failed to start practice.");
       }
+      startBackgroundMusic();
       setSessionId(data.sessionId);
     } catch (error) {
+      stopBackgroundMusic();
       setError(error.message);
       setLoading(false);
     }
@@ -182,6 +216,9 @@ function Practice() {
         throw new Error(data.message || "Failed to load question.");
       }
       if (data.finished) {
+        stopBackgroundMusic();
+        playSound("complete", 0.8);
+
         setFinished(true);
         setResult({
           score: data.score || 0,
@@ -189,6 +226,9 @@ function Practice() {
           totalQuestions: data.totalQuestions || 0,
         });
         setQuestion(null);
+        setAnswering(false);
+        setTransitioning(false);
+
         return;
       }
       const safeQuestion = {
@@ -199,6 +239,7 @@ function Practice() {
       setSelectedAnswer(null);
       setAnswerResult(null);
     } catch (error) {
+      stopBackgroundMusic();
       setError(error.message);
     } finally {
       setLoading(false);
@@ -216,6 +257,7 @@ function Practice() {
     if (answering || selectedAnswer !== null || !question) {
       return;
     }
+    playSound("answerSelected", 0.3);
     setSelectedAnswer(meaning);
     setAnswering(true);
     setError("");
@@ -237,10 +279,19 @@ function Practice() {
         throw new Error(data.message || "Failed to submit answer.");
       }
       setAnswerResult(data);
-      setTimeout(async () => {
+      if (data.isCorrect) {
+        playSound("correct", 0.7);
+      } else {
+        playSound("wrong", 0.5);
+      }
+      answerTimeoutRef.current = setTimeout(async () => {
+        answerTimeoutRef.current = null;
         setTransitioning(true);
         await new Promise((resolve) => setTimeout(resolve, 300));
         if (data.finished) {
+          stopBackgroundMusic();
+          playSound("complete", 0.8);
+
           setFinished(true);
           setResult({
             score: data.score || 0,
@@ -251,9 +302,11 @@ function Practice() {
           setAnswering(false);
           setTransitioning(false);
         } else {
+          playSound("next", 0.4);
           await loadQuestion(sessionId);
           setAnswering(false);
-          setTimeout(() => {
+          transitionTimeoutRef.current = setTimeout(() => {
+            transitionTimeoutRef.current = null;
             setTransitioning(false);
           }, 50);
         }
@@ -277,6 +330,11 @@ function Practice() {
     return "";
   }
   async function restartPractice() {
+    if (answerTimeoutRef.current) {
+      clearTimeout(answerTimeoutRef.current);
+      answerTimeoutRef.current = null;
+    }
+
     setSessionId(null);
     setQuestion(null);
     setSelectedAnswer(null);
@@ -286,6 +344,7 @@ function Practice() {
     setError("");
     setAnswering(false);
     setLoading(true);
+    stopBackgroundMusic();
     try {
       const response = await fetch(`${API_BASE_URL}/Practice/start`, {
         method: "POST",
@@ -299,8 +358,11 @@ function Practice() {
       if (!response.ok) {
         throw new Error(data.message || "Failed to restart practice.");
       }
+
+      startBackgroundMusic();
       setSessionId(data.sessionId);
     } catch (error) {
+      stopBackgroundMusic();
       setError(error.message);
       setLoading(false);
     }
@@ -347,7 +409,10 @@ function Practice() {
             <div className="result-actions">
               <button
                 className="result-icon-button practice-again-icon"
-                onClick={restartPractice}
+                onClick={() => {
+                  playSound("click", 0.35);
+                  restartPractice();
+                }}
                 disabled={loading}
                 title="Practice again"
                 aria-label="Practice again"
@@ -357,7 +422,11 @@ function Practice() {
               </button>
               <button
                 className="result-icon-button home-icon"
-                onClick={() => navigate("/student")}
+                onClick={() => {
+                  playSound("click", 0.35);
+                  stopBackgroundMusic();
+                  navigate("/student");
+                }}
                 title="Go home"
                 aria-label="Go home"
                 type="button"
@@ -382,7 +451,11 @@ function Practice() {
             <div>!</div> <h2> Something went wrong </h2> <p> {error} </p>{" "}
             <button
               className="primary-button"
-              onClick={() => navigate("/student")}
+              onClick={() => {
+                playSound("click", 0.35);
+                stopBackgroundMusic();
+                navigate("/student");
+              }}
             >
               {" "}
               Back to my sets{" "}
@@ -423,7 +496,11 @@ function Practice() {
           <button
             className="practice-close"
             type="button"
-            onClick={() => navigate("/student")}
+            onClick={() => {
+              playSound("click", 0.35);
+              stopBackgroundMusic();
+              navigate("/student");
+            }}
           >
             {" "}
             ×{" "}
@@ -462,7 +539,11 @@ function Practice() {
               <button
                 className="secondary-button"
                 type="button"
-                onClick={() => loadQuestion(sessionId)}
+                onClick={() => {
+                  playSound("click", 0.35);
+                  loadQuestion(sessionId);
+                }}
+                disabled={loading}
               >
                 {" "}
                 Try again

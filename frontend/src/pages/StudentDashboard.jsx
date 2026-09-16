@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentHeader from "../components/StudentHeader";
 import { API_BASE_URL } from "../services/api";
+import { playSound } from "../utils/sounds";
 function StudentDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -70,7 +71,10 @@ function StudentDashboard() {
             </div>
             <button
               className="student-main-play-button"
-              onClick={() => navigate(`/student/practice/${mainSet.id}`)}
+              onClick={() => {
+                playSound("click", 0.35);
+                navigate(`/student/practice/${mainSet.id}`);
+              }}
             >
               <span className="play-icon">▶</span> PLAY{" "}
             </button>
